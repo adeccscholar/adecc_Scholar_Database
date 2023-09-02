@@ -287,7 +287,7 @@ public:
          }
       }
 
-   bool Connected() {
+   bool Connected() const {
       return database.isOpen();
       }
 
