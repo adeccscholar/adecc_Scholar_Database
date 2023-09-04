@@ -29,11 +29,11 @@ class TMyQuery {
 private:
    using framework = framework_type<server_type>;
    typename framework::query_type query;
-   TMyDatabase<framework_type, server_type>& database;
+   TMyDatabase<framework_type, server_type> const& database;
    std::vector<std::string> params;
 public:
    TMyQuery(void) = delete;
-   TMyQuery(TMyDatabase<framework_type, server_type>& db) : database(db) { }
+   TMyQuery(TMyDatabase<framework_type, server_type> const& db) : database(db) { }
 
    operator typename framework::query_conv() { return query; }
 
@@ -502,23 +502,23 @@ class TMyDatabase : public framework_type<server_type> {
       void Close(void) { framework::Close(); }
 
       
-      TMyQuery<framework_type, server_type> CreateQuery(void) {
+      TMyQuery<framework_type, server_type> CreateQuery(void) const {
          TMyQuery<framework_type, server_type> tmp(*this);
          tmp.Create();
          return tmp;
          }
 
-      TMyQuery<framework_type, server_type> CreateQuery(std::string const& strSQL) {
+      TMyQuery<framework_type, server_type> CreateQuery(std::string const& strSQL) const {
          TMyQuery<framework_type, server_type> tmp(*this);
          tmp.Create(strSQL);
          return tmp;
          }
 
-      std::string Status(void) {
+      std::string Status(void) const {
          return std::format("{} {}", framework::Connected() ? "connected to" : "disconnected from", framework::GetInformations());
          }
 
-      std::set<std::string> GetTableNames(std::string const& schema) {
+      std::set<std::string> GetTableNames(std::string const& schema) const {
          auto query = CreateQuery();
          std::set<std::string> setTableNames;
          if constexpr (std::is_same<server_type, TMyMSSQL>::value) {
@@ -583,7 +583,7 @@ class TMyDatabase : public framework_type<server_type> {
          return setTableNames;
          }
 
-      std::set<std::string> GetViewNames(std::string const& schema) {
+      std::set<std::string> GetViewNames(std::string const& schema) const {
          auto query = CreateQuery();
          std::set<std::string> setViewNames;
          if constexpr (std::is_same<server_type, TMyMSSQL>::value) {
