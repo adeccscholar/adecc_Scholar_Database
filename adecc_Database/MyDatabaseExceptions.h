@@ -15,7 +15,7 @@ public:
                     std::optional<std::string> const& qry = { },
                     src_loc const& loc = src_loc::current(),
                     time_stamp timepoint = std::chrono::system_clock::now())
-              : TMyExceptionInformation(timepoint, loc), std::runtime_error(msg) {
+              : TMyExceptionInformation(loc, timepoint), std::runtime_error(msg) {
       the_details = det;
       the_database_infos = db;
       the_query_infos = qry;
