@@ -19,8 +19,8 @@ struct my_type_list {
    using type_variant = std::variant<Types...>;
 };
 
-using my_defined_value_types = my_type_list<int, double, long long, 
-                                            std::string, 
+using my_defined_value_types = my_type_list<int, short, double, long long, 
+                                            std::string, bool, unsigned int,
                                             std::chrono::year_month_day,
                                             std::chrono::system_clock::time_point>;
 
