@@ -57,7 +57,7 @@ public:
       TMyCredential(u, p, b), strServer(s), strDatabase(d) { }
 
    constexpr TMyMSSQL(void) : TMyMSSQL(""s, ""s, false, ""s, ""s) { }
-   constexpr TMyMSSQL(std::string const& data) : TMyMSSQL("(local)", data, true, ""s, ""s) { }
+   explicit constexpr TMyMSSQL(std::string const& data) : TMyMSSQL("(local)", data, true, ""s, ""s) { }
    constexpr TMyMSSQL(std::string const& srv, std::string const& data) : TMyMSSQL(srv, data, true, ""s, ""s) { }
 
    TMyMSSQL(TMyMSSQL const& ref) : TMyCredential(ref) , strServer(ref.strServer), strDatabase(ref.strDatabase) { }
@@ -356,7 +356,7 @@ public:
    constexpr TMySQLite(std::string const& db, std::string const& usr, std::string const& pwd) :
       TMyCredential(usr, pwd), strDatabaseName(db) { }
    TMySQLite() : TMySQLite(""s, ""s, ""s) { }
-   TMySQLite(std::string const& d) : TMySQLite(d, ""s, ""s) { }
+   explicit TMySQLite(std::string const& d) : TMySQLite(d, ""s, ""s) { }
 
    TMySQLite(TMySQLite const& ref) : TMyCredential(ref), strDatabaseName(ref.strDatabaseName) { }
 
