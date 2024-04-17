@@ -117,7 +117,7 @@ public:
    template <my_db_value_type ret_type>
    std::optional<ret_type> Get(std::string const& field, bool required = false, src_loc const& loc = src_loc::current()) {
       try {
-         return framework::Get<ret_type>(query, field, required);
+         return framework::template Get<ret_type>(query, field, required);
          }
       catch (std::exception& ex) {
          throw TMy_Db_Exception(std::format("error for get attribute: {}", field), ex.what(), database.Status(), GetSQL(), loc);
@@ -126,7 +126,7 @@ public:
 
    template <my_db_param_type param_type>
    bool Set(std::string const& field_name, param_type const& param, bool required = false, src_loc const& loc = src_loc::current()) {
-      if (auto found = framework::Set<param_type>(query, field_name, param); found) return found;
+      if (auto found = framework::template Set<param_type>(query, field_name, param); found) return found;
       else {
          if (!required) [[likely]] return found;
          else
@@ -156,7 +156,8 @@ public:
 
 
 #if defined BUILD_WITH_QT
-#include <QtSQL>
+#include <QtSql>
+#include <QString>
 #include <qsqldatabase.h>
 
 template <my_db_credentials base_type>
@@ -177,8 +178,51 @@ public:
 private:
    database_type database;
 public:
-   TMyQtDb(void) : base_type() { }
-   TMyQtDb(base_type const& ref) : base_type(ref) { }
+   TMyQtDb(void) : base_type() {
+      /*
+      if constexpr (std::is_same<base_type, TMyMSSQL>::value) {
+         database = database_type::addDatabase("QODBC");
+         }
+      else if constexpr (std::is_same<base_type, TMyOracle>::value) {
+         database = database_type::addDatabase("QOCI");
+         }
+      else if constexpr (std::is_same<base_type, TMyMySQL>::value) {
+         database = database_type::addDatabase("QMYSQL");
+         }
+      else if constexpr (std::is_same<base_type, TMyInterbase>::value) {
+         database = database_type::addDatabase("QIBASE");
+         }
+      else if constexpr (std::is_same<base_type, TMySQLite>::value) {
+         database = database_type::addDatabase("QSQLITE");
+         }
+      else static_assert_no_supported();
+      */
+      }
+
+   TMyQtDb(base_type const& ref) : base_type(ref) { 
+      /*
+      if constexpr (std::is_same<base_type, TMyMSSQL>::value) {
+         database = database_type::addDatabase("QODBC");
+         }
+      else if constexpr (std::is_same<base_type, TMyOracle>::value) {
+         database = database_type::addDatabase("QOCI");
+         }
+      else if constexpr (std::is_same<base_type, TMyMySQL>::value) {
+         database = database_type::addDatabase("QMYSQL");
+         }
+      else if constexpr (std::is_same<base_type, TMyInterbase>::value) {
+         database = database_type::addDatabase("QIBASE");
+         }
+      else if constexpr (std::is_same<base_type, TMySQLite>::value) {
+         database = database_type::addDatabase("QSQLITE");
+         }
+      else static_assert_no_supported();
+      */
+      }
+
+   ~TMyQtDb() {
+      //if(database.isValid()) database_type::removeDatabase(database.connectionName());
+      }
 
    std::string GetInformations() const { return base_type::GetInformations();  }
    operator base_type& () { return static_cast<base_type&>(*this); }
@@ -218,7 +262,11 @@ public:
 
          static constexpr auto driver = []() {
             if constexpr (std::is_same<base_type, TMyMSSQL>::value)
+#ifdef __unix__
+               return "ODBC Driver 18 for SQL Server";
+#else
                return "SQL Server Native Client 11.0"s;
+#endif
             else if constexpr (std::is_same<base_type, TMyOracle>::value || std::is_same<base_type, TMyMySQL>::value)
                return ""s;
             else static_assert_no_supported();
@@ -228,7 +276,9 @@ public:
 
          param = "DRIVER={"s + driver() + "};"s +
                  "SERVER="s + srv.Server() + ";"s +
-                 "DATABASE="s + srv.Database() + ";"s;
+                 "DATABASE="s + srv.Database() + ";"s
+                 "ENCRYPT=No;SSL=No;"s;  // workaround for linux, which inforce a ssl communication, self-signed certificate problem
+
          if (srv.Integrated()) param += "Trusted_Connection=yes;"s;   // Integrated Security=SSPI;
          else {
             param += "Uid="s + srv.User() + ";"s +
@@ -434,7 +484,7 @@ public:
             query.bindValue(field, QString::fromLatin1(QByteArray::fromStdString(param)));
             }
          else if constexpr (std::is_same<std::remove_cvref_t<param_type>, std::wstring>::value) {
-            query.bindValue(field, QString::fromWStdString(param));
+            query.bindValue(field, QString::fromStdWString(param));
             }
          else if constexpr (std::is_same<std::remove_cvref_t<param_type>, std::chrono::year_month_day>::value) {
             QDate date(static_cast<int>(param.year()), static_cast<unsigned>(param.month()), static_cast<unsigned>(param.day()));
@@ -572,12 +622,12 @@ class TMyDatabase : public framework_type<server_type> {
 
          for(query.Execute(), query.First(); !query.IsEof(); query.Next()) {
             if constexpr (std::is_same<server_type, TMyInterbase>::value) {
-               auto table = query.Get<std::string>("TableName");
+               auto table = query.template Get<std::string>("TableName");
                if (table)
                   setTableNames.insert(trim(*table));
                }
             else {
-               setTableNames.insert(query.Get<std::string>("TableName").value_or("leer"));
+               setTableNames.insert(query.template Get<std::string>("TableName").value_or("leer"));
                }
             }
          return setTableNames;
@@ -637,12 +687,12 @@ class TMyDatabase : public framework_type<server_type> {
 
          for (query.Execute(), query.First(); !query.IsEof(); query.Next()) {
             if constexpr (std::is_same<server_type, TMyInterbase>::value) {
-               auto view = query.Get<std::string>("ViewName");
+               auto view = query.template Get<std::string>("ViewName");
                if (view)
                   setViewNames.insert(trim(*view));
                }
             else {
-               setViewNames.insert(query.Get<std::string>("ViewName").value_or("leer"));
+               setViewNames.insert(query.template Get<std::string>("ViewName").value_or("leer"));
                }
             }
          return setViewNames;
