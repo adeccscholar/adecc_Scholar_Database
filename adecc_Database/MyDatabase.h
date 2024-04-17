@@ -411,6 +411,7 @@ public:
          if constexpr (std::is_same<ret_type, std::string>::value) return std::make_optional(attribut.toString().toStdString());
          else if constexpr (std::is_same<ret_type, char>::value) return std::make_optional(attribut.toChar());
          else if constexpr (std::is_same<ret_type, bool>::value) return std::make_optional(attribut.toBool());
+         else if constexpr (std::is_same<ret_type, short>::value) return std::make_optional(static_cast<short>(attribut.toInt()));
          else if constexpr (std::is_same<ret_type, int>::value) return std::make_optional(attribut.toInt());
          else if constexpr (std::is_same<ret_type, unsigned int>::value) return std::make_optional(attribut.toUInt());
          else if constexpr (std::is_same<ret_type, long long>::value) return std::make_optional(attribut.toLongLong());
