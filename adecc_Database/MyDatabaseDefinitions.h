@@ -10,8 +10,9 @@
 #include <concepts>
 
 
-//using my_date = std::chrono::year_month_day;
-//using my_timestamp = std::chrono::system_clock::time_point>;
+using my_date = std::chrono::year_month_day;
+using my_timestamp = std::chrono::system_clock::time_point;
+using my_time = std::chrono::hh_mm_ss<std::chrono::seconds>;
 
 template <typename... Types>
 struct my_type_list {
@@ -21,11 +22,12 @@ struct my_type_list {
 
 using my_defined_value_types = my_type_list<int, short, double, long long, 
                                             std::string, bool, unsigned int,
-                                            std::chrono::year_month_day,
-                                            std::chrono::system_clock::time_point>;
+                                            my_date,       //  std::chrono::year_month_day,
+                                            my_timestamp, // std::chrono::system_clock::time_point>
+                                            my_time>;
 
 using my_db_value  = typename my_defined_value_types::type_variant;
-using my_db_param  = std::tuple < std::string, my_db_value, bool>;
+using my_db_param  = std::tuple <std::string, std::optional<my_db_value>, bool>;
 using my_db_params = std::vector<my_db_param>;
 
 /*
