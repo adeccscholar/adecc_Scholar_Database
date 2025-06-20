@@ -4,7 +4,7 @@
 #include "MyDatabaseCredentials.h"
 #include "MyDatabaseDefinitions.h"
 
-#include <adecc_Scholar/MyType_Traits.h>
+#include <adecc_Tools/MyType_Traits.h>
 
 #include <type_traits>
 #include <string>
