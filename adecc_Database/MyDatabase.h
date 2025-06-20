@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 //#include <adecc_Scholar/MyForm.h>
-#include <adecc_Scholar/MyType_Traits.h>
-
+//#include <adecc_Scholar/MyType_Traits.h>
+#include <adecc_Tools/MyType_Traits.h>
 
 #include "MyDatabaseFramework.h"
 
